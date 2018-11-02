@@ -4,6 +4,7 @@
 #include <string>
 #include <ostream>
 #include <sstream>
+#include <initializer_list>
 
 const size_t CAPACITY = 64;
 
@@ -12,6 +13,7 @@ class Deque {
 public:
   Deque();
   Deque(size_t);
+  Deque(std::initializer_list<T>);
   ~Deque();
   Deque& operator=(const Deque&);
 
@@ -19,6 +21,7 @@ public:
   void push_back(T);
   void pop_front();
   void pop_back();
+  void clear();
   T& front();
   T& back();
   T& at(size_t);
@@ -26,6 +29,7 @@ public:
   T back() const;
   T at(size_t) const;
   size_t size() const;
+  bool empty() const;
   std::string to_string() const;
 
   template <typename U>
@@ -50,7 +54,16 @@ private:
 template <typename T> Deque<T>::Deque() : Deque(CAPACITY) {}
 
 template <typename T> Deque<T>::Deque(size_t capacity)
-  : container_(new T[capacity]), capacity_(capacity), size_(0), start_(0) {}
+    : container_(new T[capacity]), capacity_(capacity), size_(0), start_(0) {}
+
+template <typename T> Deque<T>::Deque(std::initializer_list<T> container)
+    : Deque(2 * container.size()) {
+  size_t i = 0;
+  for (const T& value : container) {
+    container_[i++] = value;
+  }
+  size_ = container.size();
+}
 
 template <typename T> Deque<T>::~Deque() {
   delete[] container_;
@@ -85,13 +98,18 @@ template <typename T> void Deque<T>::push_back(T value) {
 
 template <typename T> void Deque<T>::pop_front() {
   check_nonempty();
-  size--;
+  size_--;
   start_ = (start_ + 1) % capacity_;
 }
 
 template <typename T> void Deque<T>::pop_back() {
   check_nonempty();
   size_--;
+}
+
+template <typename T> void Deque<T>::clear() {
+  size_ = 0;
+  start_ = 0;
 }
 
 template <typename T> T& Deque<T>::front() {
@@ -125,6 +143,10 @@ template <typename T> T Deque<T>::at(size_t index) const {
 
 template <typename T> size_t Deque<T>::size() const {
   return size_;
+}
+
+template <typename T> bool Deque<T>::empty() const {
+  return size_ == 0;
 }
 
 template <typename T> std::string Deque<T>::to_string() const {
