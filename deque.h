@@ -1,7 +1,9 @@
 #ifndef AA_DEQUE_H_
 #define AA_DEQUE_H_
 
-#include <cstddef> // size_t
+#include <string>
+#include <ostream>
+#include <sstream>
 
 const size_t CAPACITY = 64;
 
@@ -20,7 +22,15 @@ public:
   T& front();
   T& back();
   T& at(size_t);
-  size_t size();
+  T front() const;
+  T back() const;
+  T at(size_t) const;
+  size_t size() const;
+  std::string to_string() const;
+
+  template <typename U>
+  friend std::ostream& operator<<(std::ostream&, const Deque<U>&);
+
   //DequeIterator<T> insert(DequeIterator<T>, T);
   //void remove(T);
   //T& operator[](size_t);
@@ -64,13 +74,13 @@ template <typename T> void Deque<T>::push_front(T value) {
   reallocate();
   start_ = (start_ - 1) % capacity_;
   container_[start_] = value;
-  size++;
+  size_++;
 }
 
 template <typename T> void Deque<T>::push_back(T value) {
   reallocate();
   container_[(start_ + size_) % capacity_] = value;
-  size++;
+  size_++;
 }
 
 template <typename T> void Deque<T>::pop_front() {
@@ -101,8 +111,35 @@ template <typename T> T& Deque<T>::at(size_t index) {
   return container_[(start_ + index) % capacity_];
 }
 
-template <typename T> size_t Deque<T>::size() {
+template <typename T> T Deque<T>::front() const {
+  return front();
+}
+
+template <typename T> T Deque<T>::back() const {
+  return back();
+}
+
+template <typename T> T Deque<T>::at(size_t index) const {
+  return at(index);
+}
+
+template <typename T> size_t Deque<T>::size() const {
   return size_;
+}
+
+template <typename T> std::string Deque<T>::to_string() const {
+  std::ostringstream out;
+  out << "[";
+  for (size_t i = 0; i < size_; i++) {
+    out << " " << container_[(i + start_) % capacity_];
+  }
+  out << " ]";
+  return out.str();
+}
+
+template <typename T> std::ostream& operator<<(std::ostream& out,
+    const Deque<T>& deque) {
+  return out << deque.to_string();
 }
 
 template <typename T> void Deque<T>::check_nonempty() {
