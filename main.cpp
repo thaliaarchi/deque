@@ -12,7 +12,9 @@ int main() {
   deque.pop_back();
   deque.push_back(3);
   deque.front();
-  for (int i = 4; i <= 100; i++) {
+  std::cout << deque << std::endl;
+
+  for (int i = 0; i < 100; i++) {
     deque.push_back(i);
   }
   std::cout << deque << std::endl;

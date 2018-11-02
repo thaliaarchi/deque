@@ -7,6 +7,8 @@
 #include <initializer_list>
 #include <stdexcept>
 
+#include "deque_iterator.h"
+
 const size_t CAPACITY = 64;
 
 template<typename T>
@@ -36,17 +38,17 @@ public:
   template <typename U>
   friend std::ostream& operator<<(std::ostream&, const Deque<U>&);
 
-  //DequeIterator<T> insert(DequeIterator<T>, T);
-  //void remove(T);
-  //T& operator[](size_t);
-  //DequeIterator<T> begin();
-  //DequeIterator<T> end();
+  // DequeIterator<T> insert(DequeIterator<T>, T);
+  // void remove(T);
+  // T& operator[](size_t);
+  DequeIterator<T> begin() const;
+  DequeIterator<T> end() const;
 
 private:
   T* container_;
   size_t capacity_;
   size_t size_;
-  size_t start_;
+  size_t front_;
 
   void check_nonempty();
   void reallocate();
@@ -55,7 +57,7 @@ private:
 template <typename T> Deque<T>::Deque() : Deque(CAPACITY) {}
 
 template <typename T> Deque<T>::Deque(size_t capacity)
-    : container_(new T[capacity]), capacity_(capacity), size_(0), start_(0) {}
+    : container_(new T[capacity]), capacity_(capacity), size_(0), front_(0) {}
 
 template <typename T> Deque<T>::Deque(std::initializer_list<T> container)
     : Deque(2 * container.size()) {
@@ -76,31 +78,31 @@ template <typename T> Deque<T>& Deque<T>::operator=(const Deque<T>& deque) {
     container_ = new T[deque.capacity_];
   }
   for (size_t i = 0; i < deque.size_; i++) {
-    container_[i] = deque.container_[(i + deque.start_) % deque.capacity_];
+    container_[i] = deque.container_[(i + deque.front_) % deque.capacity_];
   }
   capacity_ = deque.capacity_;
   size_ = deque.size_;
-  start_ = 0;
+  front_ = 0;
   return *this;
 }
 
 template <typename T> void Deque<T>::push_front(T value) {
   reallocate();
-  start_ = (start_ - 1) % capacity_;
-  container_[start_] = value;
+  front_ = (front_ - 1) % capacity_;
+  container_[front_] = value;
   size_++;
 }
 
 template <typename T> void Deque<T>::push_back(T value) {
   reallocate();
-  container_[(start_ + size_) % capacity_] = value;
+  container_[(front_ + size_) % capacity_] = value;
   size_++;
 }
 
 template <typename T> void Deque<T>::pop_front() {
   check_nonempty();
   size_--;
-  start_ = (start_ + 1) % capacity_;
+  front_ = (front_ + 1) % capacity_;
 }
 
 template <typename T> void Deque<T>::pop_back() {
@@ -110,17 +112,17 @@ template <typename T> void Deque<T>::pop_back() {
 
 template <typename T> void Deque<T>::clear() {
   size_ = 0;
-  start_ = 0;
+  front_ = 0;
 }
 
 template <typename T> T& Deque<T>::front() {
   check_nonempty();
-  return container_[start_];
+  return container_[front_];
 }
 
 template <typename T> T& Deque<T>::back() {
   check_nonempty();
-  return container_[(start_ + size_ - 1) % capacity_];
+  return container_[(front_ + size_ - 1) % capacity_];
 }
 
 template <typename T> T& Deque<T>::at(size_t index) {
@@ -130,7 +132,7 @@ template <typename T> T& Deque<T>::at(size_t index) {
       << ") >= this->size() (which is " << size_ << ")";
     throw std::out_of_range(out.str());
   }
-  return container_[(start_ + index) % capacity_];
+  return container_[(front_ + index) % capacity_];
 }
 
 template <typename T> T Deque<T>::front() const {
@@ -155,17 +157,26 @@ template <typename T> bool Deque<T>::empty() const {
 
 template <typename T> std::string Deque<T>::to_string() const {
   std::ostringstream out;
-  out << "[";
-  for (size_t i = 0; i < size_; i++) {
-    out << " " << container_[(i + start_) % capacity_];
+  out << "[ ";
+  for (const T& value : *this) {
+    out << value << " ";
   }
-  out << " ]";
+  out << "]";
   return out.str();
 }
 
 template <typename T> std::ostream& operator<<(std::ostream& out,
     const Deque<T>& deque) {
   return out << deque.to_string();
+}
+
+template <typename T> DequeIterator<T> Deque<T>::begin() const {
+  return DequeIterator<T>(container_, capacity_, size_, front_);
+}
+
+template <typename T> DequeIterator<T> Deque<T>::end() const {
+  return DequeIterator<T>(container_, capacity_, size_,
+    (front_ + size_) % capacity_);
 }
 
 template <typename T> void Deque<T>::check_nonempty() {
@@ -181,12 +192,12 @@ template <typename T> void Deque<T>::reallocate() {
   size_t new_capacity = capacity_ * 2;
   T* new_container = new T[new_capacity];
   for (size_t i = 0; i < size_; i++) {
-    new_container[i] = container_[(i + start_) % capacity_];
+    new_container[i] = container_[(i + front_) % capacity_];
   }
   delete[] container_;
   container_ = new_container;
   capacity_ = new_capacity;
-  start_ = 0;
+  front_ = 0;
 }
 
 #endif
