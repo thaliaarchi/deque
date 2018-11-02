@@ -24,11 +24,10 @@ public:
   void push_back(T);
   void pop_front();
   void pop_back();
+  void erase(DequeIterator<T>);
+  void reserve(size_t);
   void clear();
-
   // void insert(DequeIterator<T>, T);
-  // void erase(DequeIterator<T>);
-  // void reserve(size_t);
 
   T& front();
   T& back();
@@ -114,6 +113,32 @@ template <typename T> void Deque<T>::pop_front() {
 template <typename T> void Deque<T>::pop_back() {
   check_nonempty();
   size_--;
+}
+
+template <typename T> void Deque<T>::erase(DequeIterator<T> it) {
+  size_--;
+  if (it.index_ == front_) {
+    front_++;
+    return;
+  }
+  size_t end = (front_ + size_) % capacity_;
+  for (size_t i = it.index_ + 1; i < end; i = (i + 1) % capacity_) {
+    container_[i - 1] = container_[i];
+  }
+}
+
+template <typename T> void Deque<T>::reserve(size_t capacity) {
+  if (capacity <= capacity_) {
+    return;
+  }
+  T* new_container = new T[capacity];
+  for (size_t i = 0; i < size_; i++) {
+    new_container[i] = container_[(i + front_) % capacity_];
+  }
+  delete[] container_;
+  container_ = new_container;
+  capacity_ = capacity;
+  front_ = 0;
 }
 
 template <typename T> void Deque<T>::clear() {
@@ -207,15 +232,7 @@ template <typename T> void Deque<T>::reallocate() {
   if (size_ < capacity_) {
     return;
   }
-  size_t new_capacity = capacity_ * 2;
-  T* new_container = new T[new_capacity];
-  for (size_t i = 0; i < size_; i++) {
-    new_container[i] = container_[(i + front_) % capacity_];
-  }
-  delete[] container_;
-  container_ = new_container;
-  capacity_ = new_capacity;
-  front_ = 0;
+  reserve(capacity_ * 2);
 }
 
 #endif

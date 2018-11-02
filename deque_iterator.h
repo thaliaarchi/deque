@@ -1,10 +1,13 @@
+#include "deque.h"
+
 template <typename T>
 class DequeIterator {
 public:
   DequeIterator(T*, size_t, size_t, size_t);
 
   T& operator*();
-  void operator++();
+  DequeIterator<T>& operator++();
+  DequeIterator<T> operator+(int) const;
   bool operator!=(const DequeIterator<T>&) const;
 
 private:
@@ -12,6 +15,8 @@ private:
   size_t capacity_;
   size_t size_;
   size_t index_;
+
+  template <typename> friend class Deque;
 };
 
 template <typename T> DequeIterator<T>::DequeIterator(T* container,
@@ -22,8 +27,16 @@ template <typename T> T& DequeIterator<T>::operator*() {
   return container_[index_];
 }
 
-template <typename T> void DequeIterator<T>::operator++() {
+template <typename T> DequeIterator<T>& DequeIterator<T>::operator++() {
   index_ = (index_ + 1) % capacity_;
+  return *this;
+}
+
+template <typename T> DequeIterator<T> DequeIterator<T>::operator+(
+    int offset) const {
+  DequeIterator<T> it = *this;
+  it.index_ = (index_ + offset) % capacity_;
+  return it;
 }
 
 template <typename T> bool DequeIterator<T>::operator!=(
