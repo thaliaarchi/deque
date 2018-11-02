@@ -217,12 +217,11 @@ template <typename T> std::ostream& operator<<(std::ostream& out,
 }
 
 template <typename T> DequeIterator<T> Deque<T>::begin() const {
-  return DequeIterator<T>(container_, capacity_, size_, front_);
+  return DequeIterator<T>(container_, capacity_, size_, front_, 0);
 }
 
 template <typename T> DequeIterator<T> Deque<T>::end() const {
-  return DequeIterator<T>(container_, capacity_, size_,
-    (front_ + size_) % capacity_);
+  return DequeIterator<T>(container_, capacity_, size_, front_, size_);
 }
 
 template <typename T> void Deque<T>::check_nonempty() {
