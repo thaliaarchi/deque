@@ -92,16 +92,16 @@ template <typename T> Deque<T>& Deque<T>::operator=(const Deque<T>& deque) {
 }
 
 template <typename T> void Deque<T>::push_front(T value) {
-  reallocate();
   front_ = (front_ - 1) % capacity_;
   container_[front_] = value;
   size_++;
+  reallocate();
 }
 
 template <typename T> void Deque<T>::push_back(T value) {
-  reallocate();
   container_[(front_ + size_) % capacity_] = value;
   size_++;
+  reallocate();
 }
 
 template <typename T> void Deque<T>::pop_front() {
@@ -116,6 +116,9 @@ template <typename T> void Deque<T>::pop_back() {
 }
 
 template <typename T> void Deque<T>::erase(DequeIterator<T> it) {
+  if (it.index_ < front_ && it.index_ >= (front_ + size_) % capacity_) {
+    throw std::out_of_range("Deque: DequeIterator out of range");
+  }
   size_--;
   if (it.index_ == front_) {
     front_++;
@@ -123,7 +126,7 @@ template <typename T> void Deque<T>::erase(DequeIterator<T> it) {
   }
   size_t end = (front_ + size_) % capacity_;
   for (size_t i = it.index_ + 1; i < end; i = (i + 1) % capacity_) {
-    container_[i - 1] = container_[i];
+    container_[(i - 1) % capacity_] = container_[i];
   }
 }
 
