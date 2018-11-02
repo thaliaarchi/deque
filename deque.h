@@ -5,6 +5,7 @@
 #include <ostream>
 #include <sstream>
 #include <initializer_list>
+#include <stdexcept>
 
 const size_t CAPACITY = 64;
 
@@ -124,7 +125,10 @@ template <typename T> T& Deque<T>::back() {
 
 template <typename T> T& Deque<T>::at(size_t index) {
   if (index >= size_) {
-    throw "Index out of bounds";
+    std::ostringstream out;
+    out << "Deque: index (which is " << index
+      << ") >= this->size() (which is " << size_ << ")";
+    throw std::out_of_range(out.str());
   }
   return container_[(start_ + index) % capacity_];
 }
@@ -166,7 +170,7 @@ template <typename T> std::ostream& operator<<(std::ostream& out,
 
 template <typename T> void Deque<T>::check_nonempty() {
   if (size_ == 0) {
-    throw "Deque contains no elements";
+    throw std::out_of_range("Deque: cannot access element in empty deque");
   }
 }
 
