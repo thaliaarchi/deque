@@ -14,6 +14,7 @@ int main() {
   deque.front();
   std::cout << deque << std::endl;
 
+  deque.clear();
   for (int i = 0; i < 100; i++) {
     deque.push_back(i);
   }

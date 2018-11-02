@@ -25,12 +25,21 @@ public:
   void pop_front();
   void pop_back();
   void clear();
+
+  // void insert(DequeIterator<T>, T);
+  // void erase(DequeIterator<T>);
+  // void reserve(size_t);
+
   T& front();
   T& back();
   T& at(size_t);
+  T& operator[](size_t);
   T front() const;
   T back() const;
   T at(size_t) const;
+  T operator[](size_t) const;
+
+  size_t capacity() const;
   size_t size() const;
   bool empty() const;
   std::string to_string() const;
@@ -38,9 +47,6 @@ public:
   template <typename U>
   friend std::ostream& operator<<(std::ostream&, const Deque<U>&);
 
-  // DequeIterator<T> insert(DequeIterator<T>, T);
-  // void remove(T);
-  // T& operator[](size_t);
   DequeIterator<T> begin() const;
   DequeIterator<T> end() const;
 
@@ -73,8 +79,8 @@ template <typename T> Deque<T>::~Deque() {
 }
 
 template <typename T> Deque<T>& Deque<T>::operator=(const Deque<T>& deque) {
-  delete[] container_;
-  if (capacity_ != deque.capacity_) {
+  if (capacity_ < deque.capacity_) {
+    delete[] container_;
     container_ = new T[deque.capacity_];
   }
   for (size_t i = 0; i < deque.size_; i++) {
@@ -132,6 +138,10 @@ template <typename T> T& Deque<T>::at(size_t index) {
       << ") >= this->size() (which is " << size_ << ")";
     throw std::out_of_range(out.str());
   }
+  return operator[](index);
+}
+
+template <typename T> T& Deque<T>::operator[](size_t index) {
   return container_[(front_ + index) % capacity_];
 }
 
@@ -145,6 +155,14 @@ template <typename T> T Deque<T>::back() const {
 
 template <typename T> T Deque<T>::at(size_t index) const {
   return at(index);
+}
+
+template <typename T> T Deque<T>::operator[](size_t index) const {
+  return operator[](index);
+}
+
+template <typename T> size_t Deque<T>::capacity() const {
+  return capacity_;
 }
 
 template <typename T> size_t Deque<T>::size() const {
