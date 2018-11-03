@@ -24,6 +24,7 @@ public:
   void push_back(T);
   void pop_front();
   void pop_back();
+  void erase(DequeIterator<T>, DequeIterator<T>);
   void erase(DequeIterator<T>);
   void reserve(size_t);
   void clear();
@@ -115,24 +116,29 @@ template <typename T> void Deque<T>::pop_back() {
   size_--;
 }
 
-template <typename T> void Deque<T>::erase(DequeIterator<T> it) {
-  if (it.index_ >= size_) {
+template <typename T> void Deque<T>::erase(DequeIterator<T> begin, DequeIterator<T> end) {
+  if (begin.index_ >= size_ || end.index_ > size_ || begin.index_ > end.index_) {
     throw std::out_of_range("Deque: DequeIterator out of range");
   }
+  size_t offset = end.index_ - begin.index_;
   // Shift right
-  if (it.index_ < size_ / 2) {
-    for (size_t i = it.index_ + front_; i > front_; i--) {
-      container_[i % capacity_] = container_[(i - 1) % capacity_];
+  if (begin.index_ + end.index_ < size_) {
+    for (size_t i = end.index_ + front_ - 1; i >= front_ + offset; i--) {
+      container_[i % capacity_] = container_[(i - offset) % capacity_];
     }
-    front_++;
+    front_ += offset;
   }
   // Shift left
   else {
-    for (size_t i = it.index_ + front_; i < size_ + front_ - 1; i++) {
-      container_[i % capacity_] = container_[(i + 1) % capacity_];
+    for (size_t i = begin.index_ + front_; i < size_ + front_ - offset; i++) {
+      container_[i % capacity_] = container_[(i + offset) % capacity_];
     }
   }
-  size_--;
+  size_ -= offset;
+}
+
+template <typename T> void Deque<T>::erase(DequeIterator<T> it) {
+  return erase(it, it + 1);
 }
 
 template <typename T> void Deque<T>::reserve(size_t capacity) {

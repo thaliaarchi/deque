@@ -78,55 +78,45 @@ template <typename T> DequeIterator<T> DequeIterator<T>::operator--(int) {
   return temp;
 }
 
-template <typename T> DequeIterator<T> DequeIterator<T>::operator+(
-    int offset) const {
+template <typename T> DequeIterator<T> DequeIterator<T>::operator+(int offset) const {
   DequeIterator<T> it = *this;
   it.index_ += offset;
   return it;
 }
 
-template <typename T> DequeIterator<T> DequeIterator<T>::operator-(
-    int offset) const {
+template <typename T> DequeIterator<T> DequeIterator<T>::operator-(int offset) const {
   return operator+(-offset);
 }
 
-template <typename T> int DequeIterator<T>::operator-(
-    const DequeIterator<T>& it) const {
+template <typename T> int DequeIterator<T>::operator-(const DequeIterator<T>& it) const {
   return ((int) index_) - ((int) it.index_);
 }
 
-template <typename T> bool DequeIterator<T>::operator==(
-    const DequeIterator<T>& it) const {
+template <typename T> bool DequeIterator<T>::operator==(const DequeIterator<T>& it) const {
   return same_container(it) && index_ == it.index_;
 }
 
-template <typename T> bool DequeIterator<T>::operator!=(
-    const DequeIterator<T>& it) const {
+template <typename T> bool DequeIterator<T>::operator!=(const DequeIterator<T>& it) const {
   return !same_container(it) || index_ != it.index_;
 }
 
-template <typename T> bool DequeIterator<T>::operator<=(
-    const DequeIterator<T>& it) const {
+template <typename T> bool DequeIterator<T>::operator<=(const DequeIterator<T>& it) const {
   return same_container(it) && index_ <= it.index_;
 }
 
-template <typename T> bool DequeIterator<T>::operator>=(
-    const DequeIterator<T>& it) const {
+template <typename T> bool DequeIterator<T>::operator>=(const DequeIterator<T>& it) const {
   return same_container(it) && index_ >= it.index_;
 }
 
-template <typename T> bool DequeIterator<T>::operator<(
-    const DequeIterator<T>& it) const {
+template <typename T> bool DequeIterator<T>::operator<(const DequeIterator<T>& it) const {
   return same_container(it) && index_ < it.index_;
 }
 
-template <typename T> bool DequeIterator<T>::operator>(
-    const DequeIterator<T>& it) const {
+template <typename T> bool DequeIterator<T>::operator>(const DequeIterator<T>& it) const {
   return same_container(it) && index_ > it.index_;
 }
 
-template <typename T> bool DequeIterator<T>::same_container(
-    const DequeIterator<T>& it) const {
+template <typename T> bool DequeIterator<T>::same_container(const DequeIterator<T>& it) const {
   return container_ == it.container_ && capacity_ && it.capacity_
     && size_ == it.size_ && front_ == it.front_;
 }
