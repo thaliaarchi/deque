@@ -9,8 +9,6 @@
 #include <initializer_list>
 #include <stdexcept>
 
-const size_t CAPACITY = 64;
-
 template<typename T>
 class Deque {
 public:
@@ -42,6 +40,9 @@ public:
   T at(size_t) const;
   T operator[](size_t) const;
 
+  DequeIterator<T> begin() const;
+  DequeIterator<T> end() const;
+
   size_t capacity() const;
   size_t size() const;
   bool empty() const;
@@ -50,14 +51,13 @@ public:
   template <typename U>
   friend std::ostream& operator<<(std::ostream&, const Deque<U>&);
 
-  DequeIterator<T> begin() const;
-  DequeIterator<T> end() const;
-
 private:
   T* container_;
   size_t capacity_;
   size_t size_;
   size_t front_;
+
+  static const size_t DEFAULT_CAPACITY = 64;
 
   void reallocate();
   void shift_left(size_t, size_t, size_t);
@@ -66,7 +66,7 @@ private:
   void check_nonempty() const;
 };
 
-template <typename T> Deque<T>::Deque() : Deque(CAPACITY) {}
+template <typename T> Deque<T>::Deque() : Deque(DEFAULT_CAPACITY) {}
 
 template <typename T> Deque<T>::Deque(size_t capacity)
     : container_(new T[capacity]), capacity_(capacity), size_(0), front_(0) {}
@@ -254,6 +254,14 @@ template <typename T> T Deque<T>::operator[](size_t index) const {
   return operator[](index);
 }
 
+template <typename T> DequeIterator<T> Deque<T>::begin() const {
+  return DequeIterator<T>(container_, capacity_, size_, front_, 0);
+}
+
+template <typename T> DequeIterator<T> Deque<T>::end() const {
+  return DequeIterator<T>(container_, capacity_, size_, front_, size_);
+}
+
 template <typename T> size_t Deque<T>::capacity() const {
   return capacity_;
 }
@@ -279,14 +287,6 @@ template <typename T> std::string Deque<T>::to_string() const {
 template <typename T> std::ostream& operator<<(std::ostream& out,
     const Deque<T>& deque) {
   return out << deque.to_string();
-}
-
-template <typename T> DequeIterator<T> Deque<T>::begin() const {
-  return DequeIterator<T>(container_, capacity_, size_, front_, 0);
-}
-
-template <typename T> DequeIterator<T> Deque<T>::end() const {
-  return DequeIterator<T>(container_, capacity_, size_, front_, size_);
 }
 
 template <typename T> void Deque<T>::reallocate() {

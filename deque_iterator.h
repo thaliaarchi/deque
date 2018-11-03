@@ -1,9 +1,14 @@
+#ifndef AA_DEQUE_ITERATOR_H_
+#define AA_DEQUE_ITERATOR_H_
+
 #include "deque.h"
 
 template <typename T>
 class DequeIterator {
 public:
   DequeIterator(T*, size_t, size_t, size_t, size_t);
+  DequeIterator(const DequeIterator<T>&);
+  DequeIterator<T>& operator=(const DequeIterator&);
 
   T& operator*();
   T& operator[](int);
@@ -13,6 +18,8 @@ public:
   DequeIterator<T>& operator--();
   DequeIterator<T> operator++(int);
   DequeIterator<T> operator--(int);
+  DequeIterator<T>& operator+=(int);
+  DequeIterator<T>& operator-=(int);
   DequeIterator<T> operator+(int) const;
   DequeIterator<T> operator-(int) const;
   int operator-(const DequeIterator<T>&) const;
@@ -22,6 +29,9 @@ public:
   bool operator>=(const DequeIterator<T>&) const;
   bool operator<(const DequeIterator<T>&) const;
   bool operator>(const DequeIterator<T>&) const;
+
+  template <typename U>
+  friend DequeIterator<U> operator+(int, const DequeIterator<U>&);
 
 private:
   T* container_;
@@ -39,6 +49,15 @@ template <typename T> DequeIterator<T>::DequeIterator(T* container,
     size_t capacity, size_t size, size_t front, size_t index)
     : container_(container), capacity_(capacity), size_(size), front_(front),
       index_(index) {}
+
+template <typename T> DequeIterator<T>& DequeIterator<T>::operator=(const DequeIterator& it) {
+  container_ = it.container_;
+  capacity_ = it.capacity_;
+  size_ = it.size_;
+  front_ = it.front_;
+  index_ = it.index_;
+  return *this;
+}
 
 template <typename T> T& DequeIterator<T>::operator*() {
   return container_[(index_ + front_) % capacity_];
@@ -78,10 +97,24 @@ template <typename T> DequeIterator<T> DequeIterator<T>::operator--(int) {
   return temp;
 }
 
+template <typename T> DequeIterator<T>& DequeIterator<T>::operator+=(int offset) {
+  index_ += offset;
+  return *this;
+}
+
+template <typename T> DequeIterator<T>& DequeIterator<T>::operator-=(int offset) {
+  index_ -= offset;
+  return *this;
+}
+
 template <typename T> DequeIterator<T> DequeIterator<T>::operator+(int offset) const {
   DequeIterator<T> it = *this;
   it.index_ += offset;
   return it;
+}
+
+template <typename T> DequeIterator<T> operator+(int offset, const DequeIterator<T>& it) {
+  return it.operator+(offset);
 }
 
 template <typename T> DequeIterator<T> DequeIterator<T>::operator-(int offset) const {
@@ -120,3 +153,5 @@ template <typename T> bool DequeIterator<T>::same_container(const DequeIterator<
   return container_ == it.container_ && capacity_ && it.capacity_
     && size_ == it.size_ && front_ == it.front_;
 }
+
+#endif
