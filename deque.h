@@ -1,13 +1,13 @@
 #ifndef AA_DEQUE_H_
 #define AA_DEQUE_H_
 
+#include "deque_iterator.h"
+
 #include <string>
 #include <ostream>
 #include <sstream>
 #include <initializer_list>
 #include <stdexcept>
-
-#include "deque_iterator.h"
 
 const size_t CAPACITY = 64;
 
@@ -57,10 +57,11 @@ private:
   size_t size_;
   size_t front_;
 
-  void check_nonempty();
   void reallocate();
   void shift_left(size_t, size_t, size_t);
   void shift_right(size_t, size_t, size_t);
+  void out_of_range(const char*, size_t, const char*, const char*, size_t) const;
+  void check_nonempty() const;
 };
 
 template <typename T> Deque<T>::Deque() : Deque(CAPACITY) {}
@@ -120,13 +121,19 @@ template <typename T> void Deque<T>::pop_back() {
 }
 
 template <typename T> void Deque<T>::erase(DequeIterator<T> begin, DequeIterator<T> end) {
-  if (begin.index_ >= size_ || end.index_ > size_ || begin.index_ > end.index_) {
-    throw std::out_of_range("Deque: DequeIterator out of range");
+  if (begin.index_ >= size_) {
+    out_of_range("begin.index_", begin.index_, ">=", "this->size()", size_);
+  }
+  if (end.index_ > size_) {
+    out_of_range("end.index_", end.index_, ">", "this->size()", size_);
+  }
+  if (begin.index_ > end.index_) {
+    out_of_range("begin.index_", begin.index_, ">", "end.index_", end.index_);
   }
   size_t offset = end.index_ - begin.index_;
   if (begin.index_ + end.index_ < size_) {
     shift_right(0, begin.index_, offset);
-    front_ += offset;
+    front_ = (front_ + offset) % capacity_;
   }
   else {
     shift_left(end.index_, size_, offset);
@@ -139,7 +146,19 @@ template <typename T> void Deque<T>::erase(DequeIterator<T> it) {
 }
 
 template <typename T> void Deque<T>::insert(DequeIterator<T> it, T value) {
-
+  if (it.index_ > size_) {
+    out_of_range("it.index_", it.index_, ">", "this->size()", size_);
+  }
+  if (it.index_ < size_ / 2) {
+    shift_left(0, it.index_, 1);
+    front_ = (front_ - 1) % capacity_;
+  }
+  else {
+    shift_right(it.index_, size_, 1);
+  }
+  container_[(it.index_ + front_) % capacity_] = value;
+  size_++;
+  reallocate();
 }
 
 template <typename T> void Deque<T>::reserve(size_t capacity) {
@@ -183,10 +202,7 @@ template <typename T> T& Deque<T>::back() {
 
 template <typename T> T& Deque<T>::at(size_t index) {
   if (index >= size_) {
-    std::ostringstream out;
-    out << "Deque: index (which is " << index
-      << ") >= this->size() (which is " << size_ << ")";
-    throw std::out_of_range(out.str());
+    out_of_range("index", index, ">=", "this->size()", size_);
   }
   return operator[](index);
 }
@@ -246,12 +262,6 @@ template <typename T> DequeIterator<T> Deque<T>::end() const {
   return DequeIterator<T>(container_, capacity_, size_, front_, size_);
 }
 
-template <typename T> void Deque<T>::check_nonempty() {
-  if (size_ == 0) {
-    throw std::out_of_range("Deque: cannot access element in empty deque");
-  }
-}
-
 template <typename T> void Deque<T>::reallocate() {
   if (size_ < capacity_) {
     return;
@@ -268,6 +278,20 @@ template <typename T> void Deque<T>::shift_left(size_t begin, size_t end, size_t
 template <typename T> void Deque<T>::shift_right(size_t begin, size_t end, size_t offset) {
   for (size_t i = end + front_ - 1; i >= begin + front_; i--) {
     container_[(i + offset) % capacity_] = container_[i % capacity_];
+  }
+}
+
+template <typename T> void Deque<T>::out_of_range(const char* id_1, size_t value_1,
+    const char* op, const char* id_2, size_t value_2) const {
+  std::ostringstream out;
+  out << "Deque: " << id_1 << " (which is " << value_1 << ") "
+    << op << " " << id_2 << " (which is " << value_2 << ")";
+  throw std::out_of_range(out.str());
+}
+
+template <typename T> void Deque<T>::check_nonempty() const {
+  if (size_ == 0) {
+    throw std::out_of_range("Deque: cannot access element in empty deque");
   }
 }
 
