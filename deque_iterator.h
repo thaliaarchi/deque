@@ -6,6 +6,9 @@ public:
   DequeIterator(T*, size_t, size_t, size_t, size_t);
 
   T& operator*();
+  T& operator[](int);
+  T operator*() const;
+  T operator[](int) const;
   DequeIterator<T>& operator++();
   DequeIterator<T>& operator--();
   DequeIterator<T> operator++(int);
@@ -39,6 +42,18 @@ template <typename T> DequeIterator<T>::DequeIterator(T* container,
 
 template <typename T> T& DequeIterator<T>::operator*() {
   return container_[(index_ + front_) % capacity_];
+}
+
+template <typename T> T& DequeIterator<T>::operator[](int offset) {
+  return container_[(index_ + front_ + offset) % capacity_];
+}
+
+template <typename T> T DequeIterator<T>::operator*() const {
+  return operator*();
+}
+
+template <typename T> T DequeIterator<T>::operator[](int offset) const {
+  return operator[](offset);
 }
 
 template <typename T> DequeIterator<T>& DequeIterator<T>::operator++() {
