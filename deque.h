@@ -16,17 +16,19 @@ class Deque {
 public:
   Deque();
   Deque(size_t);
+  Deque(const Deque<T>&);
   Deque(std::initializer_list<T>);
   ~Deque();
   Deque& operator=(const Deque&);
+  Deque& operator=(std::initializer_list<T>);
 
   void push_front(T);
   void push_back(T);
   void pop_front();
   void pop_back();
-  void erase(DequeIterator<T>, DequeIterator<T>);
-  void erase(DequeIterator<T>);
-  void insert(DequeIterator<T>, T);
+  void erase(const DequeIterator<T>&, const DequeIterator<T>&);
+  void erase(const DequeIterator<T>&);
+  void insert(const DequeIterator<T>&, T);
   void reserve(size_t);
   void resize(size_t, T = T());
   void clear();
@@ -69,8 +71,17 @@ template <typename T> Deque<T>::Deque() : Deque(CAPACITY) {}
 template <typename T> Deque<T>::Deque(size_t capacity)
     : container_(new T[capacity]), capacity_(capacity), size_(0), front_(0) {}
 
+template <typename T> Deque<T>::Deque(const Deque<T>& deque)
+    : Deque(deque.capacity_) {
+  size_t i = 0;
+  for (const T& value : deque) {
+    container_[i++] = value;
+  }
+  size_ = deque.size_;
+}
+
 template <typename T> Deque<T>::Deque(std::initializer_list<T> container)
-    : Deque(2 * container.size()) {
+    : Deque(container.size() * 2) {
   size_t i = 0;
   for (const T& value : container) {
     container_[i++] = value;
@@ -83,16 +94,32 @@ template <typename T> Deque<T>::~Deque() {
 }
 
 template <typename T> Deque<T>& Deque<T>::operator=(const Deque<T>& deque) {
-  if (capacity_ < deque.capacity_) {
-    delete[] container_;
-    container_ = new T[deque.capacity_];
-  }
-  for (size_t i = 0; i < deque.size_; i++) {
-    container_[i] = deque.container_[(i + deque.front_) % deque.capacity_];
-  }
-  capacity_ = deque.capacity_;
   size_ = deque.size_;
   front_ = 0;
+  if (capacity_ < deque.capacity_) {
+    delete[] container_;
+    capacity_ = deque.capacity_ * 2;
+    container_ = new T[capacity_];
+  }
+  size_t i = 0;
+  for (const T& value : deque) {
+    container_[i++] = value;
+  }
+  return *this;
+}
+
+template <typename T> Deque<T>& Deque<T>::operator=(std::initializer_list<T> container) {
+  size_ = container.size();
+  front_ = 0;
+  if (capacity_ < size_) {
+    delete[] container_;
+    capacity_ = size_ * 2;
+    container_ = new T[capacity_];
+  }
+  size_t i = 0;
+  for (const T& value : container) {
+    container_[i++] = value;
+  }
   return *this;
 }
 
@@ -120,7 +147,7 @@ template <typename T> void Deque<T>::pop_back() {
   size_--;
 }
 
-template <typename T> void Deque<T>::erase(DequeIterator<T> begin, DequeIterator<T> end) {
+template <typename T> void Deque<T>::erase(const DequeIterator<T>& begin, const DequeIterator<T>& end) {
   if (begin.index_ >= size_) {
     out_of_range("begin.index_", begin.index_, ">=", "this->size()", size_);
   }
@@ -141,11 +168,11 @@ template <typename T> void Deque<T>::erase(DequeIterator<T> begin, DequeIterator
   size_ -= offset;
 }
 
-template <typename T> void Deque<T>::erase(DequeIterator<T> it) {
+template <typename T> void Deque<T>::erase(const DequeIterator<T>& it) {
   return erase(it, it + 1);
 }
 
-template <typename T> void Deque<T>::insert(DequeIterator<T> it, T value) {
+template <typename T> void Deque<T>::insert(const DequeIterator<T>& it, T value) {
   if (it.index_ > size_) {
     out_of_range("it.index_", it.index_, ">", "this->size()", size_);
   }
