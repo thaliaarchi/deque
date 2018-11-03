@@ -26,9 +26,10 @@ public:
   void pop_back();
   void erase(DequeIterator<T>, DequeIterator<T>);
   void erase(DequeIterator<T>);
+  void insert(DequeIterator<T>, T);
   void reserve(size_t);
+  void resize(size_t, T = T());
   void clear();
-  // void insert(DequeIterator<T>, T);
 
   T& front();
   T& back();
@@ -58,6 +59,8 @@ private:
 
   void check_nonempty();
   void reallocate();
+  void shift_left(size_t, size_t, size_t);
+  void shift_right(size_t, size_t, size_t);
 };
 
 template <typename T> Deque<T>::Deque() : Deque(CAPACITY) {}
@@ -121,24 +124,22 @@ template <typename T> void Deque<T>::erase(DequeIterator<T> begin, DequeIterator
     throw std::out_of_range("Deque: DequeIterator out of range");
   }
   size_t offset = end.index_ - begin.index_;
-  // Shift right
   if (begin.index_ + end.index_ < size_) {
-    for (size_t i = end.index_ + front_ - 1; i >= front_ + offset; i--) {
-      container_[i % capacity_] = container_[(i - offset) % capacity_];
-    }
+    shift_right(0, begin.index_, offset);
     front_ += offset;
   }
-  // Shift left
   else {
-    for (size_t i = begin.index_ + front_; i < size_ + front_ - offset; i++) {
-      container_[i % capacity_] = container_[(i + offset) % capacity_];
-    }
+    shift_left(end.index_, size_, offset);
   }
   size_ -= offset;
 }
 
 template <typename T> void Deque<T>::erase(DequeIterator<T> it) {
   return erase(it, it + 1);
+}
+
+template <typename T> void Deque<T>::insert(DequeIterator<T> it, T value) {
+
 }
 
 template <typename T> void Deque<T>::reserve(size_t capacity) {
@@ -153,6 +154,16 @@ template <typename T> void Deque<T>::reserve(size_t capacity) {
   container_ = new_container;
   capacity_ = capacity;
   front_ = 0;
+}
+
+template <typename T> void Deque<T>::resize(size_t size, T value) {
+  if (size > capacity_) {
+    reserve(size);
+  }
+  for (size_t i = front_ + size_; i < front_ + size; i++) {
+    container_[i % capacity_] = value;
+  }
+  size_ = size;
 }
 
 template <typename T> void Deque<T>::clear() {
@@ -246,6 +257,18 @@ template <typename T> void Deque<T>::reallocate() {
     return;
   }
   reserve(capacity_ * 2);
+}
+
+template <typename T> void Deque<T>::shift_left(size_t begin, size_t end, size_t offset) {
+  for (size_t i = begin + front_; i < end + front_; i++) {
+    container_[(i - offset) % capacity_] = container_[i % capacity_];
+  }
+}
+
+template <typename T> void Deque<T>::shift_right(size_t begin, size_t end, size_t offset) {
+  for (size_t i = end + front_ - 1; i >= begin + front_; i--) {
+    container_[(i + offset) % capacity_] = container_[i % capacity_];
+  }
 }
 
 #endif

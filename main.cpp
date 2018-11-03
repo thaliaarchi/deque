@@ -15,10 +15,13 @@ int main() {
   std::cout << deque << std::endl;
 
   deque.clear();
-  for (int i = 0; i < 100; i++) {
+  for (int i = 50; i < 100; i++) {
     deque.push_back(i);
   }
-  std::cout << deque << std::endl;
+  for (int i = 49; i >= 0; i--) {
+    deque.push_front(i);
+  }
+  std::cout << deque << ' ' << deque.size() << ',' << deque.capacity() << std::endl;
 
   Deque<int> deque2{1, 2, 3, 4, 5};
   std::cout << deque2 << std::endl;
