@@ -116,17 +116,16 @@ template <typename T> void Deque<T>::pop_back() {
 }
 
 template <typename T> void Deque<T>::erase(DequeIterator<T> it) {
-  if (it.index_ < front_ && it.index_ >= (front_ + size_) % capacity_) {
+  if (it.index_ >= size_) {
     throw std::out_of_range("Deque: DequeIterator out of range");
   }
   size_--;
-  if (it.index_ == front_) {
+  if (it.index_ == 0) {
     front_++;
     return;
   }
-  size_t end = (front_ + size_) % capacity_;
-  for (size_t i = it.index_ + 1; i < end; i = (i + 1) % capacity_) {
-    container_[(i - 1) % capacity_] = container_[i];
+  for (size_t i = it.index_ + front_; i < size_ + front_ - 1; i++) {
+    container_[i % capacity_] = container_[(i + 1) % capacity_];
   }
 }
 
