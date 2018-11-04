@@ -163,6 +163,17 @@ for (size_t i = 0; i < deque.size(); i++);
 for (DequeIterator<int> it = deque.begin(); it != deque.end(); ++it);
 for (const int& value : deque);
 
-deque.to_string();     // "[ 6 5 4 3 2 1 0 1 2 3 4 5]"
-std::cout << deque;    // "[ 6 5 4 3 2 1 0 1 2 3 4 5]"
+deque.to_string();     // "[ 6 5 4 3 2 1 0 1 2 3 4 5 ]"
+std::cout << deque;    // "[ 6 5 4 3 2 1 0 1 2 3 4 5 ]"
+```
+
+Insertions and removals at the ends are not O(1) time like at the ends. Elements
+are shifted to make room for the new elements. It is shifted in the direction
+requiring the fewest shifts making it at most O(n / 2).
+
+```c++
+deque.erase(deque.end() - 3);                       // [ 4 3 2 1 0 1 2 4 5 . . . . . . . . . 6 5 ] Shift back left
+deque.erase(deque.begin() + 2, deque.begin() + 4);  // [ 6 5 2 1 0 1 2 4 5 . . . . . . . . . . . ] Shift front right
+deque.insert(deque.begin() + 1, 7);                 // [ 7 5 2 1 0 1 2 4 5 . . . . . . . . . . 6 ] Shift front left
+deque.insert(deque.begin() + 6, 8);                 // [ 7 5 2 1 0 8 1 2 4 5 . . . . . . . . . 6 ] Shift back right
 ```
