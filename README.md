@@ -69,8 +69,8 @@ type, and n is an integer value.
 ## Circular Array Algorithm
 
 First, we'll create a `Deque` instance with an initial capacity of eight. The
-size is zero because it is empty. For the purposes of this tutorial, empty
-positions are represented by dots.
+size is zero because it is empty. For the purposes of this tutorial, empty or
+junk positions are represented by dots.
 
 ```c++
 Deque<int> deque(5);   // [ . . . . . ]
@@ -149,4 +149,20 @@ the time no reallocation is needed, so insertions are amortized O(1) time.
 deque.push_back(5);    // [ 1 2 3 4 5 4 3 2 1 0 . . . . . . . . . . ] - Incorrect
 deque.push_back(5);    // [ 4 3 2 1 0 1 2 3 4 5 . . . . . . . . . . ] - Correct
                        //   ^- front
+```
+
+To the user, index zero always refers to the first element and iterating is in
+order of front to back.
+
+```c++
+deque.push_front(5);   // [ 4 3 2 1 0 1 2 3 4 5 . . . . . . . . . 5 ]
+deque.push_front(6);   // [ 4 3 2 1 0 1 2 3 4 5 . . . . . . . . 6 5 ]
+
+// These all loop from front to back
+for (size_t i = 0; i < deque.size(); i++);
+for (DequeIterator<int> it = deque.begin(); it != deque.end(); ++it);
+for (const int& value : deque);
+
+deque.to_string();     // "[ 6 5 4 3 2 1 0 1 2 3 4 5]"
+std::cout << deque;    // "[ 6 5 4 3 2 1 0 1 2 3 4 5]"
 ```
