@@ -69,27 +69,24 @@ type, and n is an integer value.
 ## Circular Array Algorithm
 
 First, we'll create a `Deque` instance with an initial capacity of eight. The
-size is zero because it is empty. For the purposes of this explanation, empty
+size is zero because it is empty. For the purposes of this tutorial, empty
 positions are represented by dots.
 
 ```c++
-Deque<int> deque(8);  // [ . . . . . . . . ]
-deque.capacity();     // 8
-deque.size();         // 0
+Deque<int> deque(5);   // [ . . . . . ]
+deque.capacity();      // 5
+deque.size();          // 0
 ```
 
-Now, let's push back seven values so it only has one empty position.
+Now, let's push back four values so it has one empty position.
 
 ```c++
-deque.push_back(1);   // [ 1 . . . . . . . ]
-deque.push_back(2);   // [ 1 2 . . . . . . ]
-deque.push_back(3);   // [ 1 2 3 . . . . . ]
-deque.push_back(4);   // [ 1 2 3 4 . . . . ]
-deque.push_back(5);   // [ 1 2 3 4 5 . . . ]
-deque.push_back(6);   // [ 1 2 3 4 5 6 . . ]
-deque.push_back(7);   // [ 1 2 3 4 5 6 7 . ]
-deque.capacity();     // 8
-deque.size();         // 7
+deque.push_back(1);    // [ 1 . . . . ]
+deque.push_back(2);    // [ 1 2 . . . ]
+deque.push_back(3);    // [ 1 2 3 . . ]
+deque.push_back(4);    // [ 1 2 3 4 . ]
+deque.capacity();      // 5
+deque.size();          // 4
 ```
 
 When we push back an eighth value, the deque doubles the capacity and allocates
@@ -97,14 +94,59 @@ more space to fit more values. Even if elements are popped, the capacity does
 not decrease.
 
 ```c++
-deque.push_back(8);   // [ 1 2 3 4 5 6 7 8 . . . . . . . . ]
-deque.capacity();     // 16
-deque.size();         // 8
-deque.pop_back();     // [ 1 2 3 4 5 6 7 . . . . . . . . . ]
-deque.pop_back();     // [ 1 2 3 4 5 6 . . . . . . . . . . ]
+deque.push_back(5);    // [ 1 2 3 4 5 . . . . . ]
+deque.capacity();      // 10
+deque.size();          // 5
+deque.push_back(6);    // [ 1 2 3 4 5 6 . . . . ]
+deque.pop_back();      // [ 1 2 3 4 5 . . . . . ]
+deque.pop_back();      // [ 1 2 3 4 . . . . . . ]
 ```
 
-Up to this point, the deque has only behaved like a vector or a stack - only
-inserting and removing at the end.
+With insertions or removals, a deque behaves like a vector or a stack at the
+end. Whereas at the beginning, vectors need to shift every element to make room,
+but for deques, everything remains at the same position and new elements are
+wrapped when needed.
 
-*To be continued.*
+```c++
+vector.push_front(0);  // [ 0 1 2 3 4 . . . . . ] - Shift elements
+deque.push_front(0);   // [ 1 2 3 4 . . . . . 0 ] - Wrap elements
+```
+
+Since the deque uses a circular array, elements are not necessarily stored
+internally starting at index 0. So, index of the first element is tracked to
+allow wrapping.
+
+```
+  v- front
+[ 1 2 3 4 5 6 . . . . . . . . . . ]
+[ 1 2 3 4 5 6 . . . . . . . . . 0 ]
+                         front -^
+```
+
+As more elements are pushed to the front, the position of the front moves. Each
+insertion requires
+
+```c++
+                       //                     v- front
+deque.pop_back();      // [ 1 2 3 . . . . . . 0 ]
+deque.push_front(1);   // [ 1 2 3 . . . . . 1 0 ]
+deque.push_front(2);   // [ 1 2 3 . . . . 2 1 0 ]
+deque.push_front(3);   // [ 1 2 3 . . . 3 2 1 0 ]
+deque.push_front(4);   // [ 1 2 3 . . 4 3 2 1 0 ]
+deque.push_back(4);    // [ 1 2 3 4 . 4 3 2 1 0 ]
+                       //             ^- front
+```
+
+Inserting another element fills the capacity, so more space is allocated. It may
+be expected that the inserted value would go into the empty position with extra
+space added at the end. However, this doesn't work when iterating starting at
+the front as the empty values would appear in the middle of the data rather than
+at the end. So, the elements must be moved so the front is at index 0. Most of
+the time no reallocation is needed, so insertions are amortized O(1) time.
+
+```c++
+                       //             v- front
+deque.push_back(5);    // [ 1 2 3 4 5 4 3 2 1 0 . . . . . . . . . . ] - Incorrect
+deque.push_back(5);    // [ 4 3 2 1 0 1 2 3 4 5 . . . . . . . . . . ] - Correct
+                       //   ^- front
+```
